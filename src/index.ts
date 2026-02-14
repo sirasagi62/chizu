@@ -12,6 +12,9 @@ program
   .description("Aider-like repository entity mapper")
   .argument("[directory]", "Directory to map", ".")
   .option("-c, --compress", "Compress mode (only show signatures/first lines)", false)
+  // --- 検索オプションの追加 ---
+  .option("-q, --query <pattern>", "Search for a specific keyword in entities")
+  .option("-i, --ignore-case", "Ignore case distinctions", false)
   .action(async (directory, options) => {
     const targetPath = path.resolve(process.cwd(), directory);
 
@@ -20,28 +23,24 @@ program
       process.exit(1);
     }
 
-    // --- .gitignore の読み込み設定 ---
     const ig = ignore();
     const gitignorePath = path.join(targetPath, ".gitignore");
     if (fs.existsSync(gitignorePath)) {
       ig.add(fs.readFileSync(gitignorePath, "utf-8"));
     }
-    // デフォルトで除外したいもの
     ig.add([".git/**", "node_modules/**", "dist/**"]);
 
     const factory = createParserFactory();
-
-    // 確実に絶対パスに変換
 
     const chopperOptions: Options = {
       filter: (_, node) => {
         if (node && node.type.includes("import")) {
           return false;
         }
-
         return true;
       }
     };
+
     const res = await readDirectoryAndChunk(factory, chopperOptions, targetPath);
 
     const eachIndent = '  ';
@@ -51,33 +50,53 @@ program
       ).join('\n');
     };
 
-    let filename = "";
+    // 検索用正規表現の準備
+    let searchRegex: RegExp | null = null;
+    if (options.query) {
+      searchRegex = new RegExp(options.query, options.ignoreCase ? "i" : "");
+    }
 
+    // ファイルごとにチャンクをグループ化して処理
+    const filesMap = new Map<string, any[]>();
     res.forEach(r => {
-      // ファイルパスの相対表示
-      const relativeFilePath = path.relative(targetPath, r.filePath || "");
-
-      if (r.filePath && r.filePath !== filename) {
-        console.log("\n" + relativeFilePath + ":");
-        filename = r.filePath;
-        if (!options.compress) console.log("|...");
+      const filePath = r.filePath || "unknown";
+      if (!filesMap.has(filePath)) {
+        filesMap.set(filePath, []);
       }
+      filesMap.get(filePath)!.push(r);
+    });
 
-      // ドキュメント（JSDoc等）の表示（圧縮モードでは非表示）
-      if (!options.compress && r.boundary.docs) {
-        console.log(indentFormat(r.boundary.docs, r.boundary.parent?.length ?? 0));
-      }
+    filesMap.forEach((chunks, filePath) => {
+      const relativeFilePath = path.relative(targetPath, filePath);
 
-      const content = r.content.split("\n");
-      const indentLevel = r.boundary?.parent?.length ?? 0;
+      // 検索クエリがある場合、条件に合うチャンクがあるか先にチェック
+      const filteredChunks = searchRegex
+        ? chunks.filter(r => searchRegex!.test(r.content) || (r.boundary.docs && searchRegex!.test(r.boundary.docs)))
+        : chunks;
 
-      // エンティティの最初の1行（シグネチャ）を表示
-      console.log("|" + eachIndent.repeat(indentLevel) + content[0]);
+      // 該当するチャンクが1つもない場合は、ファイル名ごとスキップ
+      if (filteredChunks.length === 0) return;
 
-      // 圧縮モードでない場合のみ、中身があることを示す "..." を表示
-      if (!options.compress && content.length > 1) {
-        console.log("|" + eachIndent.repeat(indentLevel) + "...");
-      }
+      // ファイル名の出力
+      console.log("\n" + relativeFilePath + ":");
+      if (!options.compress) console.log("|...");
+
+      filteredChunks.forEach(r => {
+        // ドキュメントの表示
+        if (!options.compress && r.boundary.docs) {
+          console.log(indentFormat(r.boundary.docs, r.boundary.parent?.length ?? 0));
+        }
+
+        const content = r.content.split("\n");
+        const indentLevel = r.boundary?.parent?.length ?? 0;
+
+        // エンティティの表示
+        console.log("|" + eachIndent.repeat(indentLevel) + content[0]);
+
+        if (!options.compress && content.length > 1) {
+          console.log("|" + eachIndent.repeat(indentLevel) + "...");
+        }
+      });
     });
   });
 
