@@ -19,7 +19,7 @@
   "license": "ISC",
   "packageManager": "pnpm@10.29.2",
   "dependencies": {
-    "code-chopper": "^0.1.6",
+    "code-chopper": "^0.1.8",
     "commander": "^14.0.3",
     "ignore": "^7.0.5"
   },

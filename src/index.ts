@@ -32,28 +32,13 @@ program
     const factory = createParserFactory();
 
     // 確実に絶対パスに変換
-    const absoluteTargetPath = path.resolve(targetPath);
 
     const chopperOptions: Options = {
-      filter: (filePath, node) => {
-        // filePath は code-chopper から渡される絶対パス
-        const absoluteFilePath = path.resolve(filePath);
-
-        // ターゲットディレクトリからの相対パスを計算
-        const relativePath = path.relative(absoluteTargetPath, absoluteFilePath);
-
-        // 重要: ターゲットディレクトリの外側にあるファイルや、
-        // 空のパス（ターゲット自身）を ignore に渡さないようにガード
-        if (relativePath && !relativePath.startsWith('..') && !path.isAbsolute(relativePath)) {
-          if (ig.ignores(relativePath)) {
-            return false;
-          }
-        }
-
-        // インポート文を除外
-        if (node.type.includes("import")) {
+      filter: (_, node) => {
+        if (node && node.type.includes("import")) {
           return false;
         }
+
         return true;
       }
     };
