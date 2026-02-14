@@ -11,6 +11,7 @@ Powered by [code-chopper](https://github.com/sirasagi62/code-chopper).
 - **Smart Filtering**: Automatically respects `.gitignore` and ignores noisy directories (node_modules, .git, etc.).
 - **Safe Concurrency**: Built-in concurrency control to prevent `EMFILE` errors even on massive repositories.
 - **Compress Mode**: A dedicated mode to show only signatures for maximum token efficiency.
+- **Targeted Search**: Filter the map by specific keywords to find relevant functions or classes instantly.
 
 ## 🚀 Quick Start
 
@@ -45,17 +46,32 @@ chizu --compress
 chizu ./src
 ```
 
+### Search by Keyword
+Find only entities containing "fetch" (useful for identifying API logic):
+```bash
+chizu -q fetch
+```
+
+### Case-Insensitive Search
+Search without worrying about uppercase/lowercase:
+```bash
+chizu -q user -i
+```
+
+
 ## 🛠️ CLI Options
 
 | Option | Shorthand | Description | Default |
 | :--- | :--- | :--- | :--- |
 | `directory` | - | The target directory to map | `.` |
 | `--compress` | `-c` | Only show signatures and hide docs/bodies | `false` |
+| `--query <text>` | `-q` | Filter entities and files by a search keyword | - |
+| `--ignore-case` | `-i` | Ignore case distinctions when searching | `false` |
 | `--help` | `-h` | Display help information | - |
 
 ## 💡 Why chizu?
 
-When working with AI, pasting entire files is often overkill and hits context limits. `chizu` creates a "table of contents" for your code, allowing the AI to see how everything connects before you dive into specific implementation details.
+When working with AI, pasting entire files is often overkill and hits context limits. `chizu` creates a "table of contents" for your code, allowing the AI to see how everything connects before you dive into specific implementation details. Instead of mapping the whole repo, use `--query` to pinpoint specific logic across multiple files, giving the AI exactly the context it needs for a specific task.
 
 ## Acknowledgement
 This tool is inspired by aider's repomap.
