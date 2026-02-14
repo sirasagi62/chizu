@@ -1,6 +1,9 @@
 {
-  "name": "chizu",
+  "name": "@sirasagi62/chizu",
   "version": "0.1.0",
+  "publishConfig": {
+    "access": "public"
+  },
   "description": "A command-line tool that summarizes the code contained in a repository",
   "main": "dist/index.js",
   "bin": {
@@ -12,11 +15,21 @@
   "scripts": {
     "build": "tsup src/index.ts --format esm --clean --minify --shims",
     "dev": "tsup src/index.ts --format esm --watch",
-    "prepublishOnly": "npm run build"
+    "prepare": "npm run build"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "repomap",
+    "repository-map",
+    "ai-context",
+    "llm-tools",
+    "code-analysis",
+    "tree-sitter",
+    "ast",
+    "aider",
+    "cli"
+  ],
+  "author": "Gota Okabe",
+  "license": "MIT",
   "packageManager": "pnpm@10.29.2",
   "dependencies": {
     "code-chopper": "^0.1.8",
