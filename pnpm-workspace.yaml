@@ -1,5 +1,7 @@
 onlyBuiltDependencies:
   - esbuild
+  - lmdb
+  - msgpackr-extract
   - tree-sitter
   - tree-sitter-bash
   - tree-sitter-c
