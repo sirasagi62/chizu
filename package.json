@@ -7,7 +7,7 @@
   "description": "A command-line tool that summarizes the code contained in a repository",
   "main": "dist/index.js",
   "bin": {
-    "chizu": "./dist/index.mjs"
+    "chizu": "dist/index.mjs"
   },
   "files": [
     "dist"
