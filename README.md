@@ -35,10 +35,45 @@ Generate a map of the current directory:
 chizu
 ```
 
+The output will look like this:
+```
+% chizu
+
+src/index.ts:
+|...
+|const glob = fg.glob;
+|const CACHE_ROOT = path.join(os.homedir(), ".cache", "chizu");
+|// --- 1. Cache Layer (Repository) ---
+|
+|class CacheRepository {
+|...
+|  private db!: RootDatabase
+|  private hasher!: (input: string) => string
+|  async init() {
+|  ...
+```
+
 ### Compress Mode
 Show only signatures/definitions (ideal for large repos):
 ```bash
 chizu --compress
+```
+
+The output omits inline documentation and indications that lines have been omitted:
+```
+ % chizu --compress
+
+src/index.ts:
+|const glob = fg.glob;
+|const CACHE_ROOT = path.join(os.homedir(), ".cache", "chizu");
+|class CacheRepository {
+|  private db!: RootDatabase
+|  private hasher!: (input: string) => string
+|  async init() {
+|    const { h64ToString } = await xxhash();
+|  getHash(content: string): string {
+|  getCachedChunks(fullPath: string, currentHash: string): BoundaryChunk[] | null {
+|    const cached = this.db.get(fullPath);
 ```
 
 ### Specific Directory
